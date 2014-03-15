@@ -4,12 +4,16 @@ import java.util.Locale;
 
 import android.app.Activity;
 import android.app.ActionBar;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +21,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 
 public class MainActivity extends Activity implements ActionBar.TabListener {
 
@@ -35,6 +44,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
      */
     ViewPager mViewPager;
 
+    public String TAG = "MedAlt";
+   /* //private GoogleMap mMap;
+
+    *//*
+       * Define a request code to send to Google Play services
+       * This code is returned in Activity.onActivityResult
+       *//*
+    private final static int
+            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,14 +90,15 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             actionBar.addTab(
                     actionBar.newTab()
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
-                            .setTabListener(this));
+                            .setTabListener(this)
+            );
         }
-    }
 
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -125,14 +145,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            switch(position){
+            switch (position) {
                 case 0:
-                    return PlaceholderFragment.newInstance(position);
+                    return new QueryFragment();
                 case 1:
-                    return new MapFragment();
+                    return new MappFragment(MainActivity.this);
             }
-
-            return PlaceholderFragment.newInstance(position + 1);
+            return new QueryFragment();
         }
 
         @Override
@@ -155,51 +174,62 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         }
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-         /*   Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);*/
-            return fragment;
+
+   /* // Define a DialogFragment that displays the error dialog
+    public static class ErrorDialogFragment extends DialogFragment {
+        private Dialog mDialog;
+        // Default constructor. Sets the dialog field to null
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
         }
-
-        public PlaceholderFragment() {
+        // Set the dialog to display
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
         }
-
+        // Return a Dialog to the DialogFragment.
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-
-           // textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
         }
-    }
+    }*/
 
-    public static class MapFragment extends  Fragment{
-        public MapFragment(){
+  /*  @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        switch (requestCode) {
+            case CONNECTION_FAILURE_RESOLUTION_REQUEST:
+            *//*
+             * If the result code is Activity.RESULT_OK, try
+             * to connect again
+             *//*
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                    *//*
+                     * Try the request again
+                     *//*
+                        break;
+                }
+                break;
+        }
+    }*/
+
+    private boolean servicesConnected() {
+        // Check that Google Play services is available
+        int resultCode =
+                GooglePlayServicesUtil.
+                        isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0).show();
+            return false;
+        } else {
+            return true;
         }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.map_layout,container,false);
-            return rootView;
-        }
     }
 }
+
+
+
