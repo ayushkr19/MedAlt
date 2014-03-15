@@ -12,6 +12,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
+import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Gravity;
@@ -224,9 +225,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         if (resultCode != ConnectionResult.SUCCESS) {
             GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0).show();
             return false;
-        } else {
-            return true;
         }
+            return true;
+
 
     }
 }
