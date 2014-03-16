@@ -18,6 +18,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -142,7 +144,14 @@ public class MappFragment extends Fragment {
 
             for(Places places : listPlaces){
                 Log.d(TAG, "Result : " + places.getName() + " " + places.getLat() + "," + places.getLng());
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(places.getLat(),places.getLng()))
+                        .title(places.getName())
+                        .snippet( (places.getTypes())[0] + "," + (places.getTypes())[1] ));
+
             }
+
+
         }
 
         private String downloadPlaces(String strUrl) throws IOException {
