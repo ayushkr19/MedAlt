@@ -46,15 +46,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     ViewPager mViewPager;
 
     public String TAG = "MedAlt";
-   /* //private GoogleMap mMap;
 
-    *//*
-       * Define a request code to send to Google Play services
-       * This code is returned in Activity.onActivityResult
-       *//*
-    private final static int
-            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -157,7 +149,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show 2 total pages.
             return 2;
         }
 
@@ -174,27 +166,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             return null;
         }
     }
-
-
-
-   /* // Define a DialogFragment that displays the error dialog
-    public static class ErrorDialogFragment extends DialogFragment {
-        private Dialog mDialog;
-        // Default constructor. Sets the dialog field to null
-        public ErrorDialogFragment() {
-            super();
-            mDialog = null;
-        }
-        // Set the dialog to display
-        public void setDialog(Dialog dialog) {
-            mDialog = dialog;
-        }
-        // Return a Dialog to the DialogFragment.
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-    }*/
 
   /*  @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -217,7 +188,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         }
     }*/
 
-    private boolean servicesConnected() {
+    /*private boolean servicesConnected() {
         // Check that Google Play services is available
         int resultCode =
                 GooglePlayServicesUtil.
@@ -229,7 +200,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             return true;
 
 
-    }
+    }*/
 }
 
 
