@@ -50,10 +50,7 @@ public class MappFragment extends Fragment {
 
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
-
         if(status == ConnectionResult.SUCCESS){ // Google Play Services are available
-
-            //Toast.makeText(getActivity(),"Gservices available",Toast.LENGTH_SHORT).show();
             Log.d(TAG,"Gservices available");
             View rootView = inflater.inflate(R.layout.map_layout,container,false);
             return rootView;
@@ -152,29 +149,17 @@ public class MappFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             try{
                 URL url = new URL(strUrl);
-
-                // Creating an http connection to communicate with url
                 urlConnection = (HttpURLConnection) url.openConnection();
-
-                // Connecting to url
                 urlConnection.connect();
-
-                // Reading data from url
                 iStream = urlConnection.getInputStream();
-
                 BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-
                 StringBuilder sb  = new StringBuilder();
-
                 String line = "";
                 while( ( line = br.readLine())  != null){
                     sb.append(line);
                 }
-
                 data = sb.toString();
-
                 br.close();
-
             }catch(Exception e){
                 Log.d(TAG, "Exception (downloadPlaces): " + e.toString());
             }finally{
