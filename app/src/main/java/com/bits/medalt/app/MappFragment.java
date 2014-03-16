@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -99,7 +100,6 @@ public class MappFragment extends Fragment {
 
         switch (item.getItemId()){
             case R.id.search:
-                Toast.makeText(getActivity(),"Search",Toast.LENGTH_LONG).show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -109,7 +109,7 @@ public class MappFragment extends Fragment {
      * Created by ayush on 16/3/14.
      * @author Ayush Kumar
      */
-    public class PlacesDownloader extends AsyncTask<String,String,List<Places>> {
+    public class PlacesDownloader extends AsyncTask<String,String,ArrayList<Places>> {
 
         private final String GEOMETRY_KEY = "geometry";
         private final String LOCATION_KEY = "location";
@@ -126,7 +126,7 @@ public class MappFragment extends Fragment {
         }
 
         @Override
-        protected List<Places> doInBackground(String... params) {
+        protected ArrayList<Places> doInBackground(String... params) {
             String data = null;
             try {
                 data = downloadPlaces(params[0]);
@@ -138,7 +138,7 @@ public class MappFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<Places> listPlaces) {
+        protected void onPostExecute(ArrayList<Places> listPlaces) {
             super.onPostExecute(listPlaces);
         }
 
@@ -174,18 +174,19 @@ public class MappFragment extends Fragment {
             }catch(Exception e){
                 Log.d(TAG, "Exception (downloadPlaces): " + e.toString());
             }finally{
-                iStream.close();
-                urlConnection.disconnect();
+                if (iStream!=null && urlConnection!=null) {
+                    iStream.close();
+                    urlConnection.disconnect();
+                }
             }
 
             return data;
         }
 
-        private List<Places> parseJson(String data){
-            JSONObject PlacesJSONObject = StringToJsonObject(data);
-            JSONArray PlacesJSONArray = JsonObjectToJsonArray(PlacesJSONObject,RESULTS_KEY);
-
-            return null;
+        private ArrayList<Places> parseJson(String data){
+            JSONObject responseJSONObject = StringToJsonObject(data);
+            JSONArray resultsJSONArray = JsonObjectToJsonArray(responseJSONObject,RESULTS_KEY);
+            return JsonArrayToArrayListPlaces(resultsJSONArray);
         }
 
         private JSONObject StringToJsonObject(String data){
@@ -217,9 +218,9 @@ public class MappFragment extends Fragment {
                 name = jsonObject.getString(NAME_KEY);
                 types = getTypes(jsonObject);
             } catch (JSONException e) {
-                Log.d(TAG,"JSONException (JsonObjectToPlaces) : "+e.toString());
+                Log.d(TAG,"JSONException (JsonObjectToPlaces) : " + e.toString());
             }
-            return new Places(name,Double.parseDouble(lat),Double.parseDouble(lng),null);
+            return new Places(name,Double.parseDouble(lat),Double.parseDouble(lng),types);
         }
 
         private String[] getTypes(JSONObject jsonObject){
@@ -230,13 +231,30 @@ public class MappFragment extends Fragment {
             } catch (JSONException e) {
                 Log.d(TAG,"JSONException (getTypes) : " + e.toString());
             }
-            String typesString = typesJsonArray.toString();
-            Log.d(TAG,typesString);
-            typesString = typesString.substring(1,typesString.length() - 1);
-            Log.d(TAG,typesString);
-            types = typesString.split(",");
-            Log.d(TAG,types.toString());
+            if (typesJsonArray != null) {
+                String typesString = typesJsonArray.toString();
+                Log.d(TAG,typesString);
+                typesString = typesString.substring(1,typesString.length() - 1);
+                Log.d(TAG,typesString);
+                types = typesString.split(",");
+            }
             return types;
+        }
+
+        private ArrayList<Places> JsonArrayToArrayListPlaces(JSONArray resultsJSONArray){
+            ArrayList<Places> allPlaces = new ArrayList<Places>();
+            int resultsJsonArrayLength = resultsJSONArray.length();
+            for(int i = 0; i < resultsJsonArrayLength; i++ ){
+                JSONObject placesJsonObject = null;
+                try {
+                    placesJsonObject = resultsJSONArray.getJSONObject(i);
+                    Places places = JsonObjectToPlaces(placesJsonObject);
+                    allPlaces.add(places);
+                } catch (JSONException e) {
+                    Log.d(TAG,"JSONException (JsonArrayToArrayListPlaces) : " + e.toString());
+                }
+            }
+            return allPlaces;
         }
     }
 }
