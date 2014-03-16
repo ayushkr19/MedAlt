@@ -3,6 +3,7 @@ package com.bits.medalt.app;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +18,18 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
 
 /**
  * Created by ayush on 15/3/14.
@@ -90,5 +103,133 @@ public class MappFragment extends Fragment {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Created by ayush on 16/3/14.
+     * @author Ayush Kumar
+     */
+    public class PlacesDownloader extends AsyncTask<String,String,List<Places>> {
+
+        private final String GEOMETRY_KEY = "geometry";
+        private final String LOCATION_KEY = "location";
+        private final String RESULTS_KEY = "results";
+        private final String LAT_KEY = "lat";
+        private final String LONG_KEY = "lng";
+        private final String NAME_KEY = "name";
+        private final String PLACES_KEY = "places";
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected List<Places> doInBackground(String... params) {
+            String data = null;
+            try {
+                data = downloadPlaces(params[0]);
+            } catch (Exception e) {
+                Log.d(TAG,"PlaceDownloader's doInBackground : " + e.toString());
+            }
+
+            return parseJson(data);
+        }
+
+        @Override
+        protected void onPostExecute(List<Places> listPlaces) {
+            super.onPostExecute(listPlaces);
+        }
+
+        private String downloadPlaces(String strUrl) throws IOException {
+            String data = "";
+            InputStream iStream = null;
+            HttpURLConnection urlConnection = null;
+            try{
+                URL url = new URL(strUrl);
+
+                // Creating an http connection to communicate with url
+                urlConnection = (HttpURLConnection) url.openConnection();
+
+                // Connecting to url
+                urlConnection.connect();
+
+                // Reading data from url
+                iStream = urlConnection.getInputStream();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+                StringBuilder sb  = new StringBuilder();
+
+                String line = "";
+                while( ( line = br.readLine())  != null){
+                    sb.append(line);
+                }
+
+                data = sb.toString();
+
+                br.close();
+
+            }catch(Exception e){
+                Log.d(TAG, "Exception (downloadPlaces): " + e.toString());
+            }finally{
+                iStream.close();
+                urlConnection.disconnect();
+            }
+
+            return data;
+        }
+
+        private List<Places> parseJson(String data){
+            JSONObject PlacesJSONObject = StringToJsonObject(data);
+            JSONArray PlacesJSONArray = JsonObjectToJsonArray(PlacesJSONObject,RESULTS_KEY);
+
+            return null;
+        }
+
+        private JSONObject StringToJsonObject(String data){
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(data);
+            } catch (JSONException e) {
+                Log.d(TAG,"JSONException (StringToJsonObject)" + e.toString());
+            }
+            return jsonObject;
+        }
+
+        private JSONArray JsonObjectToJsonArray(JSONObject jsonObject,String key){
+            JSONArray jsonArray = null;
+            try {
+                jsonArray = jsonObject.getJSONArray(key);
+            } catch (JSONException e) {
+                Log.d(TAG,"JSONException (JsonObjectToJsonArray) :");
+            }
+            return jsonArray;
+        }
+
+        private Places JsonObjectToPlaces(JSONObject jsonObject){
+            String lat = null, lng = null, name = null;
+            String[] types = null;
+            try {
+                lat = jsonObject.getJSONObject(GEOMETRY_KEY).getJSONObject(LOCATION_KEY).getString(LAT_KEY);
+                lng = jsonObject.getJSONObject(GEOMETRY_KEY).getJSONObject(LOCATION_KEY).getString(LONG_KEY);
+                name = jsonObject.getString(NAME_KEY);
+                types = getTypes(jsonObject);
+            } catch (JSONException e) {
+                Log.d(TAG,"JSONException (JsonObjectToPlaces) : "+e.toString());
+            }
+            return new Places(name,Double.parseDouble(lat),Double.parseDouble(lng),null);
+        }
+
+        private String[] getTypes(JSONObject jsonObject){
+            JSONArray jsonArray = null;
+            try {
+                jsonArray = jsonObject.getJSONArray(PLACES_KEY);
+            } catch (JSONException e) {
+                Log.d(TAG,"JSONException (getTypes) : " + e.toString());
+            }
+            return null;
+        }
     }
 }

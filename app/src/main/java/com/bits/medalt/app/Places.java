@@ -5,23 +5,37 @@ package com.bits.medalt.app;
  * @author Ayush Kumar
  */
 public class Places {
-    public Places(String id, String name, double lat, double lng) {
-        this.id = id;
-        this.name = name;
-        this.lat = lat;
-        this.lng = lng;
-    }
-
-    public Places(String name, double lat, double lng) {
-        this.name = name;
-        this.lat = lat;
-        this.lng = lng;
-    }
 
     public String id;
     public String name;
     public double lat;
     public double lng;
+    public String[] types;
+
+
+    public Places(String id, String name, double lat, double lng, String[] types) {
+        this.id = id;
+        this.name = name;
+        this.lat = lat;
+        this.lng = lng;
+        this.types = types;
+    }
+
+    public Places(String name, double lat, double lng, String[] types) {
+        this.name = name;
+        this.lat = lat;
+        this.lng = lng;
+        this.types = types;
+    }
+
+
+    public String[] getTypes() {
+        return types;
+    }
+
+    public void setTypes(String[] types) {
+        this.types = types;
+    }
 
     public String getId() {
         return id;
