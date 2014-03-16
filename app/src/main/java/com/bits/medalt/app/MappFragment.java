@@ -223,13 +223,20 @@ public class MappFragment extends Fragment {
         }
 
         private String[] getTypes(JSONObject jsonObject){
-            JSONArray jsonArray = null;
+            String[] types = null;
+            JSONArray typesJsonArray = null;
             try {
-                jsonArray = jsonObject.getJSONArray(TYPES_KEY);
+                typesJsonArray = jsonObject.getJSONArray(TYPES_KEY);
             } catch (JSONException e) {
                 Log.d(TAG,"JSONException (getTypes) : " + e.toString());
             }
-            return null;
+            String typesString = typesJsonArray.toString();
+            Log.d(TAG,typesString);
+            typesString = typesString.substring(1,typesString.length() - 1);
+            Log.d(TAG,typesString);
+            types = typesString.split(",");
+            Log.d(TAG,types.toString());
+            return types;
         }
     }
 }
