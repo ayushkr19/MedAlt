@@ -49,6 +49,7 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
     private GoogleMap mMap;
     public ArrayList<Places> allPlaces = null;
 
+    //TODO : Fragment's constructor's should not be parameterized. Find a fix.
     public MappFragment(Context context) {
         this.mContext = context;
     }
@@ -72,6 +73,10 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
         }
 
     }
+
+    /**
+     * Check if Map is ready or not. If not ready, try to initialize again
+     */
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
@@ -90,21 +95,28 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
     public void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+
+        //Set up map to show user location
         mMap.setMyLocationEnabled(true);
+
         setHasOptionsMenu(true);
         mMap.setOnInfoWindowClickListener(this);
     }
 
+    //To show details of a Place(Hospital/Pharmacy) on Marker's InfoWindow Click
     @Override
     public void onInfoWindowClick(Marker marker) {
+        //Needed to fetch Reference to pass on to PlaceDetailDownloader AsyncTask.
         Places mPlaces = null;
         for(Places places : allPlaces){
+            //TODO : More stricter checking to ensure correct match
             if(places.getName().equalsIgnoreCase(marker.getTitle())){
                 mPlaces = places;
                 break;
             }
         }
         if (mPlaces != null) {
+            //Use Places API to show details of a Place(Hospital/Pharmacy)
             String reference = mPlaces.getReference();
             String url = "https://maps.googleapis.com/maps/api/place/details/json?reference="
                     + reference
@@ -135,9 +147,12 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
     /**
      * Created by ayush on 16/3/14.
      * @author Ayush Kumar
+     *
+     * Asynctask to download information about nearby Hospitals/Pharmacies & display on the map
      */
     public class PlacesDownloader extends AsyncTask<String,String,ArrayList<Places>> {
 
+        //JSON Keys
         private final String GEOMETRY_KEY = "geometry";
         private final String LOCATION_KEY = "location";
         private final String RESULTS_KEY = "results";
@@ -161,17 +176,23 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             } catch (Exception e) {
                 Log.d(TAG,"PlaceDownloader's doInBackground : " + e.toString());
             }
-
+            // TODO : Check for not null
             return parseJson(data);
         }
 
         @Override
         protected void onPostExecute(ArrayList<Places> listPlaces) {
             super.onPostExecute(listPlaces);
+            //TODO: Is any other less hacky way possible?
             MappFragment.this.allPlaces = listPlaces;
-            for(Places places : listPlaces){
 
+            //Add seperate colored markers for Hospitals & Pharmacies
+            //Normal Red markers for Hospitals & Blue markers for Pharmacies
+            for(Places places : listPlaces){
+                //TODO : Remove Log message
                 Log.d(TAG, "Result : " + places.getName() + " " + places.getLat() + "," + places.getLng());
+
+                //TODO : IMP -> Check places.getTypes() for non-existent array values
                 if ( (places.getTypes()[0]).equalsIgnoreCase("pharmacy") ) {
                     mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(places.getLat(),places.getLng()))
@@ -191,6 +212,13 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
 
         }
 
+        /**
+         * A method to get the response from URL of Places API
+         *
+         * @param strUrl The URL from which to get the response
+         * @return Response in String format
+         * @throws IOException
+         */
         private String downloadPlaces(String strUrl) throws IOException {
             String data = "";
             InputStream iStream = null;
@@ -220,12 +248,28 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return data;
         }
 
+        /**
+         * Method to parse the response from Places API URL and return a List of Places to onPostExecute
+         * @param data Response from Places API URL
+         * @return ArrayList of Places containing the nearby Hospitals/Pharmacies
+         */
         private ArrayList<Places> parseJson(String data){
+            //Convert the String response to JSONObject
             JSONObject responseJSONObject = StringToJsonObject(data);
+
+            //Get corresponding JSONArray from the JSONObject using "result" key
+            //See https://developers.google.com/places/training/basic-place-search for format of the JSON
             JSONArray resultsJSONArray = JsonObjectToJsonArray(responseJSONObject,RESULTS_KEY);
+
+            //Return the ArrayList containing all Places(Hospitals/Pharmacies)
             return JsonArrayToArrayListPlaces(resultsJSONArray);
         }
 
+        /**
+         * Method to convert the String response of URL to a JSONObject
+         * @param data the response from Places API URL
+         * @return JSONObject
+         */
         private JSONObject StringToJsonObject(String data){
             JSONObject jsonObject = null;
             try {
@@ -236,6 +280,12 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return jsonObject;
         }
 
+        /**
+         * Method to convert top-level JSONObject to JSONArray using Key
+         * @param jsonObject The top-level JSONObject
+         * @param key The key of JSONArray
+         * @return The JSONArray corresponding to the Key
+         */
         private JSONArray JsonObjectToJsonArray(JSONObject jsonObject,String key){
             JSONArray jsonArray = null;
             try {
@@ -246,6 +296,11 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return jsonArray;
         }
 
+        /**
+         * Method to convert individual JSONObjects of JSONArray to Places(Hospitals/Pharmacies)
+         * @param jsonObject The JSONObjects of the JSONArray
+         * @return Corresponding Places objects
+         */
         private Places JsonObjectToPlaces(JSONObject jsonObject){
             String lat = null, lng = null, name = null, reference = null;
             String[] types = null;
@@ -262,6 +317,11 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return new Places(name,Double.parseDouble(lat),Double.parseDouble(lng),types,reference);
         }
 
+        /**
+         * Method to get types of a particular Place(Hospital/Pharmacy)
+         * @param jsonObject The JSONObjects of the JSONArray
+         * @return String array containing the types
+         */
         private String[] getTypes(JSONObject jsonObject){
             String[] types = null;
             JSONArray typesJsonArray = null;
@@ -281,6 +341,11 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return types;
         }
 
+        /**
+         * Method to return ArrayList of all the Places(Hospitals/Pharmacies)
+         * @param resultsJSONArray The JSONArray containing JSONObjects of all the Places(Hospitals/Pharmacies)
+         * @return ArrayList containing all nearby Places(Hospitals/Pharmacies)
+         */
         private ArrayList<Places> JsonArrayToArrayListPlaces(JSONArray resultsJSONArray){
             ArrayList<Places> allPlaces = new ArrayList<Places>();
             int resultsJsonArrayLength = resultsJSONArray.length();
@@ -298,8 +363,15 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
         }
     }
 
+    /**
+     * Created by ayush on 16/3/14.
+     * @author Ayush Kumar
+     *
+     * Asynctask to download information about a specific Hospital/Pharmacy & display in a DialogFragment
+     */
     public class PlaceDetailDownloader extends AsyncTask<String,String,HashMap<String,String>>{
 
+        //JSON Keys
         private final String RESULT_KEY = "result";
         private final String ADDRESS_KEY = "formatted_address";
         private final String PHN_KEY = "formatted_phone_number";
@@ -310,6 +382,7 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            //Set up an indeterminate ProgressDialog
             progressDialog = ProgressDialog.show(getActivity(),"Loading","Fetching Location Details",true);
         }
 
@@ -321,18 +394,22 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             } catch (IOException e) {
                 Log.d(TAG,"IOException (downloadPlaceDetails) : " + e.toString());
             }
+            //Parse the String response and return a HashMap containing the details
             return parseJsonPlaceDetails(data);
         }
 
         @Override
         protected void onPostExecute(HashMap<String, String> hashMap) {
             super.onPostExecute(hashMap);
+            //Cancel the ProgressDialog
             progressDialog.dismiss();
+
             String name = null;
             if(hashMap.containsKey(NAME_KEY)){
                 name = hashMap.get(NAME_KEY);
             }
 
+            //TODO : Use normal String?
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("Address : ");
             if(hashMap.containsKey(ADDRESS_KEY)){
@@ -355,11 +432,19 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
                 stringBuilder.append("Not Available");
             }
             String details = stringBuilder.toString();
+
+            //Show the details in a DialogFragment
             CustomDialogFragment customDialogFragment = CustomDialogFragment.newInstance(name,details);
             customDialogFragment.show(getFragmentManager(),TAG);
 
         }
 
+        /**
+         * Method to download response from Places API URL
+         * @param strUrl The URL from which to get the response
+         * @return Response from the URL in String format
+         * @throws IOException
+         */
         private String downloadPlaceDetails(String strUrl) throws IOException {
             String data = "";
             InputStream iStream = null;
@@ -389,6 +474,11 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return data;
         }
 
+        /**
+         * Method to convert the String response of URL to a JSONObject
+         * @param data the response from Places API URL
+         * @return JSONObject
+         */
         private JSONObject StringToJsonObject(String data){
             JSONObject jsonObject = null;
             try {
@@ -399,17 +489,31 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return jsonObject;
         }
 
+        /**
+         * Method to parse the Json containing the details of a particular Place(Hospital/Pharmacy)
+         * @param data The String response from the URL of Places API
+         * @return HashMap containing the details of the particular Place(Hospital/Pharmacy)
+         */
         private HashMap<String,String> parseJsonPlaceDetails(String data){
+
+            //Convert the String response to JSONObject
             JSONObject responseJsonObject = StringToJsonObject(data);
+
             JSONObject resultJsonObject = null;
             try {
                 resultJsonObject = responseJsonObject.getJSONObject(RESULT_KEY);
             } catch (JSONException e) {
                 Log.d(TAG,"JSONException (parseJsonPlaceDetails) " + e.toString());
             }
+            //Get details from the JSONObject in a HashMap
             return getPlaceDetailsFromJsonObject(resultJsonObject);
         }
 
+        /**
+         * Method to get the details of a Place(Hospital/Pharmacy) in a HashMap
+         * @param resultJsonObject JSONObject containing the details of the Place(Hospital/Pharmacy)
+         * @return HashMap containing the details in Name-Value pairs
+         */
         private HashMap<String,String> getPlaceDetailsFromJsonObject(JSONObject resultJsonObject){
             String address = null, phn = null, rating = null, name = null;
             try {
