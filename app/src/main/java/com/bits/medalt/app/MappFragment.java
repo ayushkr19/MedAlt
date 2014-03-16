@@ -18,6 +18,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -144,10 +145,19 @@ public class MappFragment extends Fragment {
 
             for(Places places : listPlaces){
                 Log.d(TAG, "Result : " + places.getName() + " " + places.getLat() + "," + places.getLng());
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(places.getLat(),places.getLng()))
-                        .title(places.getName())
-                        .snippet( (places.getTypes())[0] + "," + (places.getTypes())[1] ));
+                if ( (places.getTypes()[0]).equalsIgnoreCase("pharmacy") ) {
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(places.getLat(),places.getLng()))
+                            .title(places.getName())
+                            .snippet( (places.getTypes())[0] + "," + (places.getTypes())[1] )
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                } else {
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(places.getLat(),places.getLng()))
+                            .title(places.getName())
+                            .snippet((places.getTypes())[0])
+                            );
+                }
 
             }
 
@@ -233,10 +243,11 @@ public class MappFragment extends Fragment {
             }
             if (typesJsonArray != null) {
                 String typesString = typesJsonArray.toString();
-                Log.d(TAG,typesString);
                 typesString = typesString.substring(1,typesString.length() - 1);
-                Log.d(TAG,typesString);
                 types = typesString.split(",");
+                for(int i = 0; i < types.length; i++){
+                    types[i] =  types[i].substring(1,types[i].length() - 1);
+                }
             }
             return types;
         }
