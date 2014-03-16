@@ -57,6 +57,7 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
         if(status == ConnectionResult.SUCCESS){ // Google Play Services are available
+            //TODO : Remove
             Log.d(TAG,"Gservices available");
             View rootView = inflater.inflate(R.layout.map_layout,container,false);
             return rootView;
@@ -83,6 +84,7 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 // The Map is verified. It is now safe to manipulate the map.
+                //TODO : Remove
                 Log.d(TAG,"Map verified");
             }
         }
