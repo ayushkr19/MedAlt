@@ -99,7 +99,7 @@ public class MappFragment extends Fragment {
 
         switch (item.getItemId()){
             case R.id.search:
-                String url = "https://maps.googleapis.com/maps/api/place/search/json?types=pharmacy&rankby=distance&location=15.386143,73.869277&sensor=false&key=AIzaSyBfG886VyUKsOyBqpeIFGtf45O0nb7rQvs";
+                String url = "https://maps.googleapis.com/maps/api/place/search/json?types=pharmacy|hospital&rankby=distance&location=15.386143,73.869277&sensor=false&key=AIzaSyBfG886VyUKsOyBqpeIFGtf45O0nb7rQvs";
                 new PlacesDownloader().execute(url);
                 break;
         }
