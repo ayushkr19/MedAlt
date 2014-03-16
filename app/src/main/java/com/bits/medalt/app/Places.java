@@ -6,11 +6,12 @@ package com.bits.medalt.app;
  */
 public class Places {
 
-    public String id;
-    public String name;
-    public double lat;
-    public double lng;
-    public String[] types;
+    private String id;
+    private String name;
+    private double lat;
+    private double lng;
+    private String[] types;
+    private String reference;
 
 
     public Places(String id, String name, double lat, double lng, String[] types) {
@@ -28,6 +29,21 @@ public class Places {
         this.types = types;
     }
 
+    public Places(String name, double lat, double lng, String[] types, String reference) {
+        this.name = name;
+        this.lat = lat;
+        this.lng = lng;
+        this.types = types;
+        this.reference = reference;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
 
     public String[] getTypes() {
         return types;

@@ -20,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -39,10 +40,11 @@ import java.util.List;
  * Created by ayush on 15/3/14.
  * @author Ayush Kumar
  */
-public class MappFragment extends Fragment {
+public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClickListener{
     Context mContext;
     public String TAG = "MedAlt";
     private GoogleMap mMap;
+    public ArrayList<Places> allPlaces = null;
 
     public MappFragment(Context context) {
         this.mContext = context;
@@ -87,6 +89,23 @@ public class MappFragment extends Fragment {
         setUpMapIfNeeded();
         mMap.setMyLocationEnabled(true);
         setHasOptionsMenu(true);
+        mMap.setOnInfoWindowClickListener(this);
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Places mPlaces = null;
+        for(Places places : allPlaces){
+            if(places.getName().equalsIgnoreCase(marker.getTitle())){
+                mPlaces = places;
+                break;
+            }
+        }
+        if (mPlaces != null) {
+            CustomDialogFragment customDialogFragment = CustomDialogFragment.newInstance(mPlaces.getName(),mPlaces.getReference());
+            customDialogFragment.show(getFragmentManager(),TAG);
+        }
+
     }
 
     @Override
@@ -120,6 +139,7 @@ public class MappFragment extends Fragment {
         private final String LONG_KEY = "lng";
         private final String NAME_KEY = "name";
         private final String TYPES_KEY = "types";
+        private final String REF_KEY = "reference";
 
 
         @Override
@@ -142,20 +162,21 @@ public class MappFragment extends Fragment {
         @Override
         protected void onPostExecute(ArrayList<Places> listPlaces) {
             super.onPostExecute(listPlaces);
-
+            MappFragment.this.allPlaces = listPlaces;
             for(Places places : listPlaces){
+
                 Log.d(TAG, "Result : " + places.getName() + " " + places.getLat() + "," + places.getLng());
                 if ( (places.getTypes()[0]).equalsIgnoreCase("pharmacy") ) {
                     mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(places.getLat(),places.getLng()))
                             .title(places.getName())
-                            .snippet( (places.getTypes())[0] + "," + (places.getTypes())[1] )
+                            .snippet( (places.getTypes())[0].toUpperCase() + "," + (places.getTypes())[1].toUpperCase() )
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 } else {
                     mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(places.getLat(),places.getLng()))
                             .title(places.getName())
-                            .snippet((places.getTypes())[0])
+                            .snippet((places.getTypes())[0].toUpperCase())
                             );
                 }
 
@@ -220,17 +241,19 @@ public class MappFragment extends Fragment {
         }
 
         private Places JsonObjectToPlaces(JSONObject jsonObject){
-            String lat = null, lng = null, name = null;
+            String lat = null, lng = null, name = null, reference = null;
             String[] types = null;
             try {
                 lat = jsonObject.getJSONObject(GEOMETRY_KEY).getJSONObject(LOCATION_KEY).getString(LAT_KEY);
                 lng = jsonObject.getJSONObject(GEOMETRY_KEY).getJSONObject(LOCATION_KEY).getString(LONG_KEY);
                 name = jsonObject.getString(NAME_KEY);
+                reference = jsonObject.getString(REF_KEY);
+
                 types = getTypes(jsonObject);
             } catch (JSONException e) {
                 Log.d(TAG,"JSONException (JsonObjectToPlaces) : " + e.toString());
             }
-            return new Places(name,Double.parseDouble(lat),Double.parseDouble(lng),types);
+            return new Places(name,Double.parseDouble(lat),Double.parseDouble(lng),types,reference);
         }
 
         private String[] getTypes(JSONObject jsonObject){
