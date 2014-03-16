@@ -2,6 +2,7 @@ package com.bits.medalt.app;
 
 import android.app.Dialog;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,9 +32,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -102,8 +105,11 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             }
         }
         if (mPlaces != null) {
-            CustomDialogFragment customDialogFragment = CustomDialogFragment.newInstance(mPlaces.getName(),mPlaces.getReference());
-            customDialogFragment.show(getFragmentManager(),TAG);
+            String reference = mPlaces.getReference();
+            String url = "https://maps.googleapis.com/maps/api/place/details/json?reference="
+                    + reference
+                    + "&sensor=false&key=AIzaSyBfG886VyUKsOyBqpeIFGtf45O0nb7rQvs";
+            new PlaceDetailDownloader().execute(url);
         }
 
     }
@@ -290,5 +296,145 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             }
             return allPlaces;
         }
+    }
+
+    public class PlaceDetailDownloader extends AsyncTask<String,String,HashMap<String,String>>{
+
+        private final String RESULT_KEY = "result";
+        private final String ADDRESS_KEY = "formatted_address";
+        private final String PHN_KEY = "formatted_phone_number";
+        private final String RATING_KEY = "rating";
+        private final String NAME_KEY = "name";
+
+        ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = ProgressDialog.show(getActivity(),"Loading","Fetching Location Details",true);
+        }
+
+        @Override
+        protected HashMap<String, String> doInBackground(String... params) {
+            String data = null;
+            try {
+                data = downloadPlaceDetails(params[0]);
+            } catch (IOException e) {
+                Log.d(TAG,"IOException (downloadPlaceDetails) : " + e.toString());
+            }
+            return parseJsonPlaceDetails(data);
+        }
+
+        @Override
+        protected void onPostExecute(HashMap<String, String> hashMap) {
+            super.onPostExecute(hashMap);
+            progressDialog.dismiss();
+            String name = null;
+            if(hashMap.containsKey(NAME_KEY)){
+                name = hashMap.get(NAME_KEY);
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Address : ");
+            if(hashMap.containsKey(ADDRESS_KEY)){
+                stringBuilder.append(hashMap.get(ADDRESS_KEY));
+            }else {
+                stringBuilder.append("Not Available");
+            }
+
+            stringBuilder.append("\n\nPhone Number : ");
+            if(hashMap.containsKey(PHN_KEY)){
+                stringBuilder.append(hashMap.get(PHN_KEY));
+            }else {
+                stringBuilder.append("Not Available");
+            }
+
+            stringBuilder.append("\n\nRating : ");
+            if(hashMap.containsKey(RATING_KEY)){
+                stringBuilder.append(hashMap.get(RATING_KEY));
+            }else {
+                stringBuilder.append("Not Available");
+            }
+            String details = stringBuilder.toString();
+            CustomDialogFragment customDialogFragment = CustomDialogFragment.newInstance(name,details);
+            customDialogFragment.show(getFragmentManager(),TAG);
+
+        }
+
+        private String downloadPlaceDetails(String strUrl) throws IOException {
+            String data = "";
+            InputStream iStream = null;
+            HttpURLConnection urlConnection = null;
+            try{
+                URL url = new URL(strUrl);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.connect();
+                iStream = urlConnection.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+                StringBuilder sb  = new StringBuilder();
+                String line = "";
+                while( ( line = br.readLine())  != null){
+                    sb.append(line);
+                }
+                data = sb.toString();
+                br.close();
+            }catch(Exception e){
+                Log.d(TAG, "Exception (downloadPlaces): " + e.toString());
+            }finally{
+                if (iStream!=null && urlConnection!=null) {
+                    iStream.close();
+                    urlConnection.disconnect();
+                }
+            }
+
+            return data;
+        }
+
+        private JSONObject StringToJsonObject(String data){
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(data);
+            } catch (JSONException e) {
+                Log.d(TAG,"JSONException (StringToJsonObject)" + e.toString());
+            }
+            return jsonObject;
+        }
+
+        private HashMap<String,String> parseJsonPlaceDetails(String data){
+            JSONObject responseJsonObject = StringToJsonObject(data);
+            JSONObject resultJsonObject = null;
+            try {
+                resultJsonObject = responseJsonObject.getJSONObject(RESULT_KEY);
+            } catch (JSONException e) {
+                Log.d(TAG,"JSONException (parseJsonPlaceDetails) " + e.toString());
+            }
+            return getPlaceDetailsFromJsonObject(resultJsonObject);
+        }
+
+        private HashMap<String,String> getPlaceDetailsFromJsonObject(JSONObject resultJsonObject){
+            String address = null, phn = null, rating = null, name = null;
+            try {
+                name = resultJsonObject.getString(NAME_KEY);
+                address = resultJsonObject.getString(ADDRESS_KEY);
+                phn = resultJsonObject.getString(PHN_KEY);
+                rating = resultJsonObject.getString(RATING_KEY);
+            } catch (JSONException e) {
+                Log.d(TAG,"JSONException (getPlaceDetailsFromJsonObject) " + e.toString());
+            }
+            HashMap<String,String> hashMap = new HashMap<String, String>();
+            if(name != null){
+                hashMap.put(NAME_KEY,name);
+            }
+            if(address != null){
+                hashMap.put(ADDRESS_KEY,address);
+            }
+            if(phn != null){
+                hashMap.put(PHN_KEY,phn);
+            }
+            if(rating != null){
+                hashMap.put(RATING_KEY,rating);
+            }
+            return hashMap;
+        }
+
     }
 }
