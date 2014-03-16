@@ -117,7 +117,7 @@ public class MappFragment extends Fragment {
         private final String LAT_KEY = "lat";
         private final String LONG_KEY = "lng";
         private final String NAME_KEY = "name";
-        private final String PLACES_KEY = "places";
+        private final String TYPES_KEY = "types";
 
 
         @Override
@@ -225,7 +225,7 @@ public class MappFragment extends Fragment {
         private String[] getTypes(JSONObject jsonObject){
             JSONArray jsonArray = null;
             try {
-                jsonArray = jsonObject.getJSONArray(PLACES_KEY);
+                jsonArray = jsonObject.getJSONArray(TYPES_KEY);
             } catch (JSONException e) {
                 Log.d(TAG,"JSONException (getTypes) : " + e.toString());
             }
