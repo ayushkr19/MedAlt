@@ -140,6 +140,10 @@ public class MappFragment extends Fragment {
         @Override
         protected void onPostExecute(ArrayList<Places> listPlaces) {
             super.onPostExecute(listPlaces);
+
+            for(Places places : listPlaces){
+                Log.d(TAG, "Result : " + places.getName() + " " + places.getLat() + "," + places.getLng());
+            }
         }
 
         private String downloadPlaces(String strUrl) throws IOException {
