@@ -142,7 +142,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
                 case 0:
                     return new QueryFragment();
                 case 1:
-                    return new MappFragment(MainActivity.this);
+                    return new MappFragment();
             }
             return new QueryFragment();
         }

@@ -44,21 +44,18 @@ import java.util.List;
  * @author Ayush Kumar
  */
 public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClickListener{
-    Context mContext;
     public String TAG = "MedAlt";
     private GoogleMap mMap;
     public ArrayList<Places> allPlaces = null;
 
-    //TODO : Fragment's constructor's should not be parameterized. Find a fix.
-    public MappFragment(Context context) {
-        this.mContext = context;
+    public MappFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // Getting Google Play availability status
-        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
+        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
         if(status == ConnectionResult.SUCCESS){ // Google Play Services are available
             Log.d(TAG,"Gservices available");
             View rootView = inflater.inflate(R.layout.map_layout,container,false);
