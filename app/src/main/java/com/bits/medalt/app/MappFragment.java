@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -377,6 +378,7 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
         private final String RATING_KEY = "rating";
         private final String NAME_KEY = "name";
 
+        boolean dialogCheck = true;
         ProgressDialog progressDialog;
         @Override
         protected void onPreExecute() {
@@ -384,6 +386,12 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             //Set up an indeterminate ProgressDialog
             progressDialog = ProgressDialog.show(getActivity(),"Loading","Fetching Location Details",true);
             progressDialog.setCancelable(true);
+            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    dialogCheck = false;
+                }
+            });
         }
 
         @Override
@@ -402,40 +410,42 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
         protected void onPostExecute(HashMap<String, String> hashMap) {
             super.onPostExecute(hashMap);
             //Cancel the ProgressDialog
-            progressDialog.dismiss();
+            if (dialogCheck) {
+                progressDialog.dismiss();
 
-            String name = null;
-            if(hashMap.containsKey(NAME_KEY)){
-                name = hashMap.get(NAME_KEY);
+                String name = null;
+                if(hashMap.containsKey(NAME_KEY)){
+                    name = hashMap.get(NAME_KEY);
+                }
+
+                //TODO : Use normal String?
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("Address : ");
+                if(hashMap.containsKey(ADDRESS_KEY)){
+                    stringBuilder.append(hashMap.get(ADDRESS_KEY));
+                }else {
+                    stringBuilder.append("Not Available");
+                }
+
+                stringBuilder.append("\n\nPhone Number : ");
+                if(hashMap.containsKey(PHN_KEY)){
+                    stringBuilder.append(hashMap.get(PHN_KEY));
+                }else {
+                    stringBuilder.append("Not Available");
+                }
+
+                stringBuilder.append("\n\nRating : ");
+                if(hashMap.containsKey(RATING_KEY)){
+                    stringBuilder.append(hashMap.get(RATING_KEY));
+                }else {
+                    stringBuilder.append("Not Available");
+                }
+                String details = stringBuilder.toString();
+
+                //Show the details in a DialogFragment
+                CustomDialogFragment customDialogFragment = CustomDialogFragment.newInstance(name,details);
+                customDialogFragment.show(getFragmentManager(),TAG);
             }
-
-            //TODO : Use normal String?
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Address : ");
-            if(hashMap.containsKey(ADDRESS_KEY)){
-                stringBuilder.append(hashMap.get(ADDRESS_KEY));
-            }else {
-                stringBuilder.append("Not Available");
-            }
-
-            stringBuilder.append("\n\nPhone Number : ");
-            if(hashMap.containsKey(PHN_KEY)){
-                stringBuilder.append(hashMap.get(PHN_KEY));
-            }else {
-                stringBuilder.append("Not Available");
-            }
-
-            stringBuilder.append("\n\nRating : ");
-            if(hashMap.containsKey(RATING_KEY)){
-                stringBuilder.append(hashMap.get(RATING_KEY));
-            }else {
-                stringBuilder.append("Not Available");
-            }
-            String details = stringBuilder.toString();
-
-            //Show the details in a DialogFragment
-            CustomDialogFragment customDialogFragment = CustomDialogFragment.newInstance(name,details);
-            customDialogFragment.show(getFragmentManager(),TAG);
 
         }
 
