@@ -383,6 +383,7 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             super.onPreExecute();
             //Set up an indeterminate ProgressDialog
             progressDialog = ProgressDialog.show(getActivity(),"Loading","Fetching Location Details",true);
+            progressDialog.setCancelable(true);
         }
 
         @Override
