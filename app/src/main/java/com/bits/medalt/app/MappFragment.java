@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -44,13 +45,12 @@ import java.util.List;
  * Created by ayush on 15/3/14.
  * @author Ayush Kumar
  */
-public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClickListener{
+public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClickListener,GooglePlayServicesClient.ConnectionCallbacks{
     public String TAG = "MedAlt";
     private GoogleMap mMap;
     public ArrayList<Places> allPlaces = null;
 
-    public MappFragment() {
-    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,6 +71,22 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
             return rootView;
         }
 
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     /**
@@ -137,12 +153,37 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
 
         switch (item.getItemId()){
             case R.id.search:
+                //TODO : Get location, then start the AsyncTask.
                 String url = "https://maps.googleapis.com/maps/api/place/search/json?types=pharmacy|hospital&rankby=distance&location=15.386143,73.869277&sensor=false&key=AIzaSyBfG886VyUKsOyBqpeIFGtf45O0nb7rQvs";
                 new PlacesDownloader().execute(url);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /*
+     * Called by Location Services when the request to connect the
+     * client finishes successfully. At this point, you can
+     * request the current location or start periodic updates
+     */
+    @Override
+    public void onConnected(Bundle dataBundle) {
+        // Display the connection status
+        Toast.makeText(getActivity(), "Connected", Toast.LENGTH_SHORT).show();
+
+    }
+
+    /*
+     * Called by Location Services if the connection to the
+     * location client drops because of an error.
+     */
+    @Override
+    public void onDisconnected() {
+        // Display the connection status
+        Toast.makeText(getActivity(), "Disconnected. Please re-connect.",
+                Toast.LENGTH_SHORT).show();
+    }
+
 
     /**
      * Created by ayush on 16/3/14.
@@ -211,6 +252,8 @@ public class MappFragment extends Fragment implements GoogleMap.OnInfoWindowClic
 
 
         }
+
+
 
         /**
          * A method to get the response from URL of Places API
