@@ -58,7 +58,8 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
     public class QueryDownloader extends AsyncTask<String, String, String> {
 
         //private String BASE_URL = "http://ayushkr19.kd.io/query.php";
-        private String BASE_URL = "http://192.168.1.2/query.php";
+        //private String BASE_URL = "http://192.168.1.2/query.php";
+        private String BASE_URL = "http://ayushkumar.site90.net/query_webhost.php";
         int QueryLength = 0;
         int status = 0;
 
