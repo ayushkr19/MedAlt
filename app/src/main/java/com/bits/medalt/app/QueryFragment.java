@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,11 +43,13 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
 
     String TAG = "MedAlt";
     EditText editText;
+    ListView lv_result;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        lv_result = (ListView) rootView.findViewById(R.id.lv_results);
         editText = (EditText) rootView.findViewById(R.id.et_query);
         Button button = (Button) rootView.findViewById(R.id.bt_query);
         button.setOnClickListener(this);
@@ -184,8 +187,7 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
 
         @Override
         protected void onPostExecute(ArrayList<Medicine> medicines) {
-
-
+            lv_result.setAdapter(new QueryResultListAdapter(medicines,getActivity()));
             super.onPostExecute(medicines);
         }
 
@@ -201,19 +203,22 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
 
         private ArrayList<Medicine> JSONArrayToMedicine(JSONArray jsonArray){
             ArrayList<Medicine> medicineArrayList = new ArrayList<Medicine>();
-            for(int i=0; i<jsonArray.length(); i++){
-                JSONObject jsonObject = null;
-                try {
-                    jsonObject = jsonArray.getJSONObject(i);
-                    String trade_name = jsonObject.getString("trade_name");
-                    String api = jsonObject.getString("api");
-                    String dosage = jsonObject.getString("dosage");
-                    String category = jsonObject.getString("category");
+            if (jsonArray!=null) {
+                for(int i=0; i<jsonArray.length(); i++){
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = jsonArray.getJSONObject(i);
+                        Log.d(TAG,i + " " + jsonObject.toString());
+                        String trade_name = jsonObject.getString("trade_name");
+                        String api = jsonObject.getString("api");
+                        String dosage = jsonObject.getString("dosage");
+                        String category = jsonObject.getString("category");
 
-                    Medicine medicine = new Medicine(trade_name,api,dosage,category);
-                    medicineArrayList.add(medicine);
-                } catch (JSONException e) {
-                    Log.d(TAG,"JOSNArrayToMedicine exception");
+                        Medicine medicine = new Medicine(trade_name,api,dosage,category);
+                        medicineArrayList.add(medicine);
+                    } catch (JSONException e) {
+                        Log.d(TAG,"JOSNArrayToMedicine exception");
+                    }
                 }
             }
 
