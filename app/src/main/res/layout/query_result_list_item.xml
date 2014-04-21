@@ -19,16 +19,17 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
             android:text="Test"
             android:ellipsize="end"
-            android:gravity="left"/>
+            android:gravity="left|center"/>
         <TextView
             android:id="@+id/tv_api"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:text="Test 2"
-            android:gravity="right"/>
+            android:gravity="right|center"/>
 
         </LinearLayout>
     <LinearLayout
@@ -42,16 +43,18 @@
         <TextView
             android:id="@+id/tv_dosage"
             android:layout_width="0dp"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:layout_weight="1"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:text="Test 2"
-            android:gravity="left"/>
+            android:gravity="left|center"/>
         <TextView
             android:id="@+id/tv_category"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:text="Test 2"
-            android:gravity="right"/>
+            android:gravity="right|center"/>
         </LinearLayout>
 
     </LinearLayout>
