@@ -49,9 +49,17 @@ public class QueryResultListAdapter extends BaseAdapter {
 
         }
 
-        //TextView textView = (TextView) convertView.findViewById(R.id.)
-        Medicine medicine = result_medicines.get(position);
+        TextView trade_name = (TextView) convertView.findViewById(R.id.tv_trade_name);
+        TextView api = (TextView) convertView.findViewById(R.id.tv_api);
+        TextView dosage = (TextView) convertView.findViewById(R.id.tv_dosage);
+        TextView category = (TextView) convertView.findViewById(R.id.tv_category);
 
-        return null;
+        Medicine medicine = result_medicines.get(position);
+        trade_name.setText(medicine.getTrade_name());
+        api.setText(medicine.getApi());
+        dosage.setText(medicine.getDosage());
+        category.setText(medicine.getCategory());
+
+        return convertView;
     }
 }
