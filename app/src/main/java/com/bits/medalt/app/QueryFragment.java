@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -86,6 +88,7 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
             if (getActivity()!=null) {
                 Toast.makeText(getActivity(),s,Toast.LENGTH_LONG).show();
             }
+            new MedicineParser().execute(s);
             super.onPostExecute(s);
         }
 
@@ -160,4 +163,35 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
 
     }
 
+    public class MedicineParser extends AsyncTask<String,String,String>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+
+
+        @Override
+        protected String doInBackground(String... params) {
+            JSONArray jsonArray = StringToJSONArray(params[0]);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+
+        private JSONArray StringToJSONArray(String data){
+            JSONArray jsonArray = null;
+            try{
+                jsonArray = new JSONArray(data);
+            }catch (JSONException e){
+                Log.d(TAG,"JSONException (StringToJsonArray) :");
+            }
+            return jsonArray;
+        }
+    }
 }
