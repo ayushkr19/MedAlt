@@ -1,4 +1,4 @@
-package com.bits.medalt.app;
+package com.bits.medalt.app.com.bits.medalt.db;
 
 /**
  * Created by ayush on 16/3/14.
