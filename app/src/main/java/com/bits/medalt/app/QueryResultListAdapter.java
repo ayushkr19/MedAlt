@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.bits.medalt.app.com.bits.medalt.db.Medicine;
+import com.bits.medalt.app.db.Medicine;
 
 import java.util.ArrayList;
 

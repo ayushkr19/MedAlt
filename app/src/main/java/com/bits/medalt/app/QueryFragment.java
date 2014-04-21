@@ -10,10 +10,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bits.medalt.app.com.bits.medalt.db.Medicine;
+import com.bits.medalt.app.db.Medicine;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
