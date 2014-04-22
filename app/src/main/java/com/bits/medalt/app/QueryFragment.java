@@ -78,6 +78,7 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            // Add ProgressDialog to display progress
             progressDialog = ProgressDialog.show(getActivity(), "Loading", "Fetching alternatives...", true);
             progressDialog.setCancelable(true);
             progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -103,9 +104,6 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
 
         @Override
         protected void onPostExecute(String s) {
-            /*if (getActivity()!=null) {
-                Toast.makeText(getActivity(),s,Toast.LENGTH_LONG).show();
-            }*/
             if (dialogCheck) {
                 if(s == null){
                     Toast.makeText(getActivity(),"Network Error! Please try again later!",Toast.LENGTH_LONG).show();
@@ -202,13 +200,21 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
         @Override
         protected ArrayList<Medicine> doInBackground(String... params) {
             JSONArray jsonArray = StringToJSONArray(params[0]);
-            ArrayList<Medicine> medicineArrayList = JSONArrayToMedicine(jsonArray);
-            return medicineArrayList;
+            if(jsonArray != null){
+                ArrayList<Medicine> medicineArrayList = JSONArrayToMedicine(jsonArray);
+                return medicineArrayList;
+            }else{
+                return null;
+            }
         }
 
         @Override
         protected void onPostExecute(ArrayList<Medicine> medicines) {
-            lv_result.setAdapter(new QueryResultListAdapter(medicines,getActivity()));
+            if (medicines != null) {
+                lv_result.setAdapter(new QueryResultListAdapter(medicines,getActivity()));
+            } else {
+                Toast.makeText(getActivity(),"No results found",Toast.LENGTH_LONG).show();
+            }
             super.onPostExecute(medicines);
         }
 
@@ -224,7 +230,6 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
 
         private ArrayList<Medicine> JSONArrayToMedicine(JSONArray jsonArray){
             ArrayList<Medicine> medicineArrayList = new ArrayList<Medicine>();
-            if (jsonArray!=null) {
                 for(int i=0; i<jsonArray.length(); i++){
                     JSONObject jsonObject = null;
                     try {
@@ -253,7 +258,7 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
                         Log.d(TAG,"JOSNArrayToMedicine exception");
                     }
                 }
-            }
+
 
             return medicineArrayList;
         }
