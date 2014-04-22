@@ -107,9 +107,14 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
                 Toast.makeText(getActivity(),s,Toast.LENGTH_LONG).show();
             }*/
             if (dialogCheck) {
-                progressDialog.dismiss();
+                if(s == null){
+                    Toast.makeText(getActivity(),"Network Error! Please try again later!",Toast.LENGTH_LONG).show();
+                }
+                else {
+                    progressDialog.dismiss();
+                    new MedicineParser().execute(s);
+                }
 
-                new MedicineParser().execute(s);
             }
             super.onPostExecute(s);
         }
