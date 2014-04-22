@@ -1,6 +1,8 @@
 package com.bits.medalt.app;
 
 import android.app.Fragment;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -70,10 +72,21 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
         private String BASE_URL = "http://ayushkumar.site90.net/select_test.php";
         int QueryLength = 0;
         int status = 0;
+        ProgressDialog progressDialog;
+        boolean dialogCheck = true;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            progressDialog = ProgressDialog.show(getActivity(), "Loading", "Fetching alternatives...", true);
+            progressDialog.setCancelable(true);
+            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    dialogCheck = false;
+                }
+            });
+
         }
 
 
@@ -90,10 +103,14 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
 
         @Override
         protected void onPostExecute(String s) {
-            if (getActivity()!=null) {
+            /*if (getActivity()!=null) {
                 Toast.makeText(getActivity(),s,Toast.LENGTH_LONG).show();
+            }*/
+            if (dialogCheck) {
+                progressDialog.dismiss();
+
+                new MedicineParser().execute(s);
             }
-            new MedicineParser().execute(s);
             super.onPostExecute(s);
         }
 
@@ -105,7 +122,7 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
                 URL url = new URL(BASE_URL);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("POST");
-                urlConnection.setReadTimeout(4000);
+                urlConnection.setReadTimeout(5000);
                 urlConnection.setDoOutput(true);
 
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -208,10 +225,22 @@ public class QueryFragment extends Fragment implements View.OnClickListener{
                     try {
                         jsonObject = jsonArray.getJSONObject(i);
                         Log.d(TAG,i + " " + jsonObject.toString());
+
                         String trade_name = jsonObject.getString("trade_name");
+                        if(trade_name == null)
+                            trade_name = "";
+
                         String api = jsonObject.getString("api");
+                        if(api == null)
+                            api = "";
+
                         String dosage = jsonObject.getString("dosage");
+                        if(dosage == null)
+                            dosage = "";
+
                         String category = jsonObject.getString("category");
+                        if(category == null)
+                            category = "";
 
                         Medicine medicine = new Medicine(trade_name,api,dosage,category);
                         medicineArrayList.add(medicine);
